@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Marca;
 use Illuminate\Http\Request;
 
@@ -98,19 +99,35 @@ class MarcaController extends Controller
        if($marca === null){
         return response()->json('Marca não encontrada', 404);
        }
+      
 
        if($request->method() === 'PATCH'){
+        
+        $regrasDinamicas = array();
+
         foreach($marca->rules() as $input => $regra){
-            if(array_key_exists($input, $request->all())){
-                $regrasDinamicas[$input]= $regra;
+            
+            if(array_key_exists($input, $request->all())) {
+                $regrasDinamicas[$input] = $regra;
             }
+
             $request->validate($regrasDinamicas,$marca->feedback());
         }
        }else{
         $request->validate($marca->rules(),$marca->feedback());
        }
 
+       if($request->file('imagem')){
+        Storage::disk('public')->delete($marca->imagem);
+       }
 
+       $imagem = $request->file('imagem');
+       $imagem_urn = $imagem->store('imagem', 'public');
+
+       $marca->update([
+           'nome' => $request->nome,
+           'imagem' => $imagem_urn
+       ]);
        
        $marca->update($request->all());
        return $marca;
@@ -125,6 +142,15 @@ class MarcaController extends Controller
     public function destroy($id)
     {
         $marca = $this->marca->find($id);
+   
+        if($marca == null){
+            return response()->json('Marca não encontrada', 404);
+        }
+
+        
+            Storage::disk('public')->delete($marca->imagem);
+           
+        
         $marca->delete();
     }
 }
