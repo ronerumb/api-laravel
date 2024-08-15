@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Modelo extends Model
 {
     use HasFactory;
-    protected $fillable = ['nome', 'imagem','numero_portas','lugares','air_bag','abs'];
+    protected $fillable = ['marca_id','nome', 'imagem','numero_portas','lugares','air_bag','abs'];
 
     public function rules() {
         return [
@@ -22,6 +22,9 @@ class Modelo extends Model
             
         ];
 
+    }
+    public function marca(){
+        return $this->belongsTo('App\Models\Marca');
     }
 
     

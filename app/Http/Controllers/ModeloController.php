@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use App\Models\Modelo;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class ModeloController extends Controller
     public function index()
     {
 
-         return response()->json($this->modelo->all(), 200);
+         return response()->json($this->with('marca')->get(), 200);
     }
 
     /**
@@ -67,7 +68,7 @@ class ModeloController extends Controller
      */
     public function show($id)
     {
-        $modelo = $this->modelo->find($id);
+        $modelo = $this->modelo->with('marca')->find($id);
         if($modelo === null){
             return response()->json('Modelo não encontrado', 404);
         }
@@ -92,7 +93,7 @@ class ModeloController extends Controller
      * @param  \App\Models\Modelo  $modelo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Modelo $modelo)
+    public function update(Request $request,$id)
     {
         $modelo = $this->modelo->find($id);
 
@@ -124,17 +125,11 @@ class ModeloController extends Controller
         $imagem = $request->file('imagem');
         $imagem_urn = $imagem->store('imagem/modelos', 'public');
  
-        $marca->update([
-           'marca_id'=>$request->marca_id,
-            'nome' =>$request->nome,
-            'imagem' =>$imagem_urn,
-            'numero_portas'=>$request->numero_portas,
-            'lugares'=>$request->lugares,
-            'air_bag'=>$request->air_bag,
-            'abs'=>$request->abs
-        ]);
-        
-        $modelo->update($request->all());
+  
+        $modelo->fill($request->all());
+        $modelo->imagem = $imagem_urn;
+        $modelo->save();
+
         return $modelo;
     }
 
@@ -156,6 +151,6 @@ class ModeloController extends Controller
             Storage::disk('public')->delete($modelo->imagem);
            
         
-        $marca->delete();
+        $modelo->delete();
     }
 }

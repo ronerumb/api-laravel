@@ -22,7 +22,7 @@ class MarcaController extends Controller
      */
     public function index()
     {
-        $marcas = $this->marca->all();
+        $marcas = $this->with('modelos')->get();
         return $marcas;
     }
 
@@ -67,7 +67,7 @@ class MarcaController extends Controller
     public function show($id)
     {
 
-        $marca = $this->marca->find($id);
+        $marca = $this->marca->with('modelos')->find($id);
         if($marca === null){
             return response()->json('Marca não encontrada', 404);
         }
@@ -124,12 +124,10 @@ class MarcaController extends Controller
        $imagem = $request->file('imagem');
        $imagem_urn = $imagem->store('imagem', 'public');
 
-       $marca->update([
-           'nome' => $request->nome,
-           'imagem' => $imagem_urn
-       ]);
-       
-       $marca->update($request->all());
+       $marca->fill($request->all());
+       $marca->imagem = $imagem_urn;
+       $marca->save();
+
        return $marca;
     }
 
