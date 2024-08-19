@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Modelo;
 use Illuminate\Http\Request;
+use App\Repositories\ModeloRepository;
 
 class ModeloController extends Controller
 {
@@ -18,11 +19,32 @@ class ModeloController extends Controller
      public function __construct(Modelo $modelo){
         $this->modelo = $modelo;
      }
-    public function index()
-    {
+     
+     public function index(Request $request)
+     {
+        $modeloRepository = new ModeloRepository($this->modelo);
 
-         return response()->json($this->with('marca')->get(), 200);
-    }
+
+        if($request->has('atributos_marca')) {
+            $atributos_marca = 'marca:id,'.$request->atributos_marca;
+            $modeloRepository->selectAtributosRegistrosRelacionados($atributos_marca);
+        } else {
+           
+            $modeloRepository->selectAtributosRegistrosRelacionados('marca');
+        }
+        if($request->has('filtro')) {
+            $modeloRepository->filtro($request->filtro);
+             
+         }
+
+        if($request->has('atributos')) {
+            $atributos = $request->atributos;
+            $modeloRepository->selectAtributos($request->atributos);
+        } 
+
+      
+        return response()->json($modeloRepository->getResultado(), 200);
+     }
 
     /**
      * Show the form for creating a new resource.
