@@ -23,6 +23,10 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 Vue.component('login-component', require('./components/login.vue').default);
 Vue.component('home-component', require('./components/home.vue').default);
 Vue.component('marcas-component', require('./components/marcas.vue').default);
+Vue.component('input-container-component', require('./components/inputContainer.vue').default);
+Vue.component('table-component', require('./components/table.vue').default);
+Vue.component('card-component', require('./components/card.vue').default);
+Vue.component('modal-component', require('./components/modal.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
