@@ -38,21 +38,25 @@
         </div>
     </div>
            <modal-component id="modalMarca" titulo="Adicionar Marca">
+            <template v-slot:alertas>
+                <alert-component tipo="success" :detalhes="transacaoDetalhes" titulo="Cadastro realizado com sucesso" v-if="transacaoStatus =='adicionado'"></alert-component>
+                 <alert-component tipo="danger" :detalhes="transacaoDetalhes" titulo="Erro ao tentar salvar a Marca" v-if="transacaoStatus =='erro'"></alert-component>
+            </template>
             <template v-slot:conteudo>
             <div class="form-group">
                  <input-container-component titulo="Nome da Marca" id="novoNome" id-help="novoNomeHelp" texto-ajuda="Informe o nome da marca" >
-                    <input type="text" class="form-control" id="novoNome" aria-describedby="novoNomeHelp" placeholder="Nome da marca">
+                    <input type="text" class="form-control" id="novoNome" aria-describedby="novoNomeHelp" placeholder="Nome da marca" v-model="nomeMarca">
                 </input-container-component>  
             </div>
                   <div class="form-group">
                  <input-container-component titulo="Imagem" id="novoImagem" id-help="novoImagemHelp" texto-ajuda="Selecione uma imagem no formato PNG" >
-                    <input type="file" class="form-control-file" id="novoImagem" aria-describedby="novoImagemHelp" placeholder="Selecione uma imagem">
+                    <input type="file" class="form-control-file" id="novoImagem" aria-describedby="novoImagemHelp" placeholder="Selecione uma imagem" @change="carregarImagem($event)">
                 </input-container-component>  
             </div>
             </template>
             <template v-slot:rodape>
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                 <button type="button" class="btn btn-primary">Salvar</button>
+                 <button type="button"  class="btn btn-primary" @click="salvar()">Salvar</button>
             </template>
            </modal-component>
 </div>
@@ -60,6 +64,50 @@
 </template>
 
 <script>
+import alert from './alert.vue';
+
+export default {
+  components: { alert },
+    data(){
+        return {
+            urlBase:'http://localhost:8000/api/marca',
+            nomeMarca: '',
+            arquivoImagem: [],
+            transacaoStatus: '',
+            transacaoDetalhes: []
+        }
+    },
+        methods: {
+            carregarImagem(e){
+                this.arquivoImagem = e.target.files
+            },
+            salvar(){
+                let formData = new FormData();
+                formData.append('nome',this.nomeMarca)
+                formData.append('imagem',this.arquivoImagem[0])
+                
+                let config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Accept': 'application/json'
+                    }
+                }
+                axios.post(this.urlBase,formData,config)
+                .then(response=>{
+                    this.transacaoStatus = 'adicionado'
+                    this.transacaoDetalhes = response
+                    
+                })
+                .catch(errors =>{
+                    this.transacaoStatus = 'erro'
+                    this.transacaoDetalhes = errors.response
+                    //console.log(errors.response.data.message)
+                })
+            }
+        }
+    
+}
+
 
    
 </script>
