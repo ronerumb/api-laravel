@@ -29,7 +29,10 @@
 
                 <card-component titulo="Relação de marcas">                
                     <template v-slot:conteudo>                
-                    <table-component></table-component>
+                    <table-component 
+                    :dados="marcas"
+                    :titulos="['ID','Nome','Imagem']">
+                    </table-component>
                     </template>  
                     <template v-slot:rodape>
                     <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#modalMarca">Adicionar</button>
@@ -59,25 +62,57 @@
                  <button type="button"  class="btn btn-primary" @click="salvar()">Salvar</button>
             </template>
            </modal-component>
+
 </div>
 
 </template>
 
 <script>
-import alert from './alert.vue';
+    export default {
+    computed: {
+            token() {
 
-export default {
-  components: { alert },
+                let token = document.cookie.split(';').find(indice => {
+                    return indice.includes('token=')
+                })
+
+                token = token.split('=')[1]
+                token = 'Bearer ' + token
+
+                return token
+            }
+        },
     data(){
         return {
             urlBase:'http://localhost:8000/api/marca',
             nomeMarca: '',
             arquivoImagem: [],
             transacaoStatus: '',
-            transacaoDetalhes: []
+            transacaoDetalhes: [],
+            marcas: []
         }
     },
         methods: {
+            carregarLista(){
+
+                 let config = {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': this.token
+                    }
+                }
+                axios.get(this.urlBase,config)
+                .then(response =>{
+                    this.marcas = response.data
+                    
+
+                })
+                .catch(errors =>{
+                    console.log(errors)
+                })
+            },
+
+
             carregarImagem(e){
                 this.arquivoImagem = e.target.files
             },
@@ -89,7 +124,8 @@ export default {
                 let config = {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Authorization': this.token
                     }
                 }
                 axios.post(this.urlBase,formData,config)
@@ -104,9 +140,13 @@ export default {
                     //console.log(errors.response.data.message)
                 })
             }
+        },
+            mounted(){
+                this.carregarLista()
+            }
         }
     
-}
+
 
 
    
