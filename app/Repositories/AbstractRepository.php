@@ -15,7 +15,7 @@ abstract class AbstractRepository{
     }
 
     public function filtro($filtros){
-        $filtros = explode(':', $filtros);
+        $filtros = explode(';', $filtros);
 
         foreach($filtros as $key =>$condicao){
 
@@ -30,6 +30,9 @@ abstract class AbstractRepository{
     }
     public function getResultado(){
         return $this->model->get();
+    }
+    public function getResultadoPaginado($numeroRegistroPorPagina){
+        return $this->model->paginate($numeroRegistroPorPagina);
     }
 
 }
