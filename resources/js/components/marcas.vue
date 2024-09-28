@@ -33,7 +33,7 @@
                     :dados="marcas.data"
                     :visualizar="{visivel: true, dataToggle: 'modal', dataTarget: '#modalMarcaVisualizar'}"
                     :atualizar="true"
-                    :remover="true"
+                    :remover="{visivel: true, dataToggle: 'modal', dataTarget: '#modalMarcaRemover'}"
                     :titulos="['id','nome','imagem']">
                     </table-component>
                     </template>  
@@ -101,11 +101,36 @@
               </modal-component>
              <!--- Fim modal visualização de marca -->
 
+                       <!--- Inicio modal exclusao de marca -->
+              <modal-component id="modalMarcaRemover" titulo="Remover Marca">
+                <template v-slot:alertas>
+
+                    <alert-component tipo="success" :detalhes="$store.state.transacao" titulo="Sucesso" v-if="$store.state.transacao.status == 'sucesso'"></alert-component>
+                     <alert-component tipo="danger" :detalhes="$store.state.transacao" titulo="Erro" v-if="$store.state.transacao.status == 'erro'"></alert-component>
+
+                </template>
+                 <template v-slot:conteudo v-if="$store.state.transacao.status != 'sucesso'">
+                    <input-container-component titulo="ID">
+                    <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+                    </input-container-component>
+                     <input-container-component titulo="Marca">
+                    <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+                    </input-container-component>                    
+                 </template>
+                  <template v-slot:rodape>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                  <button type="button" class="btn btn-danger" data-dismiss="modal" @click="remover()" v-if="$store.state.transacao.status != 'sucesso'">Remover</button>
+               
+            </template>
+              </modal-component>
+             <!--- Fim modal exclusao de marca -->
+
 </div>
 
 </template>
 
 <script>
+import { config } from 'vue/types/umd'
 import inputContainer from './inputContainer.vue'
     export default {
   components: { inputContainer },
@@ -136,6 +161,35 @@ import inputContainer from './inputContainer.vue'
         }
     },
         methods: {
+
+            remover(){
+                let confirmacao = confirm('Tem certeza que deseja remover esse registro?')
+                if(!confirmacao){
+                    return false;
+                }
+                let formData = new FormData();
+                formData.append('_method','delete')
+
+               let config = {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': this.token
+                    }
+                }
+                let url = this.urlBase + '/' + this.$store.state.item.id
+                axios.post(url,formData,config)
+                .then(response =>{
+                    this.$store.state.transacao.status = 'sucesso'
+                    this.$store.state.transacao.mensagem = 'Registro Removido com sucesso'
+                    this.carregarLista()
+                })
+                .catch(errors =>{
+                    this.$store.state.transacao.status = 'erro'
+                    this.$store.state.transacao.mensagem = 'Ocorreu um erro na remocação do registro'+errors;
+                    console.log('Erro')
+                })
+            },
+
             pesquisar(){
                 let filtro = ''
                 for (let chave in this.busca){
