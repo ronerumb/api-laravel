@@ -24,7 +24,7 @@
                         </template>
                            <td v-if="visualizar.visivel || atualizar.visivel || remover.visivel">
                             <button v-if="visualizar.visivel" class="btn btn-outline-primary btn-sm" :data-toggle="visualizar.dataToggle" :data-target="visualizar.dataTarget" @click="setStore(obj)">Visualizar</button>
-                            <button v-if="atualizar" class="btn btn-outline-primary btn-sm">Atualizar</button>
+                            <button v-if="atualizar.visivel" class="btn btn-outline-primary btn-sm" :data-toggle="atualizar.dataToggle" :data-target="atualizar.dataTarget" @click="setStore(obj)">Atualizar</button>
                             <button v-if="remover.visivel" :data-toggle="remover.dataToggle" :data-target="remover.dataTarget" class="btn btn-outline-danger btn-sm" @click="setStore(obj)">Remover</button>
 
                         </td>
@@ -42,6 +42,9 @@ export default{
     ],
     methods:{
         setStore(obj){
+            this.$store.state.transacao.status = ''
+            this.$store.state.transacao.mensagem = ''
+            this.$store.state.transacao.dados = ''            
             this.$store.state.item = obj
         }
     }

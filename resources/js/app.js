@@ -7,6 +7,7 @@
 require('./bootstrap');
 
 window.Vue = require('vue').default;
+import Vue from 'vue';
 
 import Vuex from 'Vuex';
 Vue.use(Vuex)
@@ -14,7 +15,7 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
     state:{
         item: {},
-        transacao: {status: '', mensagem: ''}
+        transacao: {status: '', mensagem: '',dados:''}
 
     }
 })
